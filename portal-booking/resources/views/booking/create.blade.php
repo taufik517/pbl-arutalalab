@@ -78,7 +78,7 @@
                 <option value="">-- Pilih Ruang --</option>
                 @if(!empty($rooms) && count($rooms) > 0)
                     @foreach($rooms as $room)
-                        <option value="{{ $room['id'] }}">{{ $room['name'] }} ({{ $room['capacity'] }} orang)</option>
+                        <option value="{{ $room['id'] }}" {{ old('room_id') == $room['id'] ? 'selected' : '' }}>{{ $room['name'] }} ({{ $room['capacity'] }} orang)</option>
                     @endforeach
                 @else
                     <option value="">Tidak ada ruang tersedia</option>
@@ -88,10 +88,10 @@
             <input type="text" id="title" name="title" value="{{ old('title') }}" required placeholder="Judul Booking">
 
             <label for="start_time">Waktu Mulai:</label>
-            <input type="datetime-local" id="start_time" name="start_time" required>
+            <input type="datetime-local" id="start_time" name="start_time" value="{{ old('start_time') }}" required>
 
             <label for="end_time">Waktu Selesai:</label>
-            <input type="datetime-local" id="end_time" name="end_time" required>
+            <input type="datetime-local" id="end_time" name="end_time" value="{{ old('end_time') }}" required>
 
             <button type="submit">Buat Pemesanan</button>
         </form>
