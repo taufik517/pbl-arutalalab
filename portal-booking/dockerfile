@@ -1,0 +1,37 @@
+# stage 1:membangun depedensi
+FROM composer:latest AS builder
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-plugins --no-scripts
+COPY . .
+
+# stage 2: membangun aplikasi
+FROM php:8.3-fpm-alpine
+
+WORKDIR /var/www/html
+
+RUN apk add --no-cache \
+    git \
+    curl \
+    libzip-dev \
+    oniguruma-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    mariadb-connector-c-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+    
+COPY --from=builder /app .
+
+RUN chown -R www-data:www-data /var/www/html
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
