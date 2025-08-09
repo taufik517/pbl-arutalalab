@@ -35,6 +35,18 @@ public function store(Request $request)
         'end_time' => 'required|date_format:Y-m-d\TH:i|after:start_time',
     ]);
 
+    // Check for overlapping bookings in the same room
+    $conflictingBooking = \App\Models\Booking::where('room_id', $validated['room_id'])
+        ->where('end_time', '>', $validated['start_time'])
+        ->where('start_time', '<', $validated['end_time'])
+        ->exists();
+
+    if ($conflictingBooking) {
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['room_id' => 'Ruangan tidak tersedia pada jadwal yang dipilih karena sudah dibooking.']);
+    }
+
     \App\Models\Booking::create($validated);
         return redirect()->route('booking.index')->with('success', 'Booking berhasil ditambahkan!');
     }
