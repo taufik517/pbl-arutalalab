@@ -35,9 +35,27 @@ public function store(Request $request)
         'end_time' => 'required|date_format:Y-m-d\TH:i|after:start_time',
     ]);
 
-    \App\Models\Booking::create($validated);
-        return redirect()->route('booking.index')->with('success', 'Booking berhasil ditambahkan!');
+    // Validasi jadwal bentrok
+    $conflict = Booking::where('room_id', $validated['room_id'])
+        ->where(function ($query) use ($validated) {
+            $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
+                  ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
+                  ->orWhere(function ($q) use ($validated) {
+                      $q->where('start_time', '<', $validated['start_time'])
+                        ->where('end_time', '>', $validated['end_time']);
+                  });
+        })
+        ->exists();
+
+    if ($conflict) {
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['Ruangan tidak tersedia pada jadwal yang dipilih karena sudah dibooking.']);
     }
+
+    \App\Models\Booking::create($validated);
+    return redirect()->route('booking.index')->with('success', 'Booking berhasil ditambahkan!');
+}
 
     public function edit(Booking $booking)
     {

@@ -76,14 +76,34 @@
             <label for="room_id">Pilih Ruang:</label>
             <select id="room_id" name="room_id" required>
                 <option value="">-- Pilih Ruang --</option>
-                @if(!empty($rooms) && count($rooms) > 0)
-                    @foreach($rooms as $room)
-                        <option value="{{ $room['id'] }}">{{ $room['name'] }} ({{ $room['capacity'] }} orang)</option>
-                    @endforeach
-                @else
-                    <option value="">Tidak ada ruang tersedia</option>
-                @endif
+                @foreach($rooms as $room)
+                    <option value="{{ $room['id'] }}">{{ $room['name'] }} ({{ $room['capacity'] }} orang)</option>
+                @endforeach
             </select>
+
+            <!-- Tempat detail ruangan -->
+            <div id="room-detail" style="margin-top:1rem; display:none;">
+                <strong>Kapasitas:</strong> <span id="room-capacity"></span><br>
+                <strong>Fasilitas:</strong> <span id="room-facilities"></span>
+            </div>
+
+            <!-- Data rooms untuk JS -->
+            <script>
+                const rooms = @json($rooms);
+
+                document.getElementById('room_id').addEventListener('change', function() {
+                    const selectedId = this.value;
+                    const room = rooms.find(r => r.id == selectedId);
+                    if (room) {
+                        document.getElementById('room-capacity').textContent = room.capacity + ' orang';
+                        document.getElementById('room-facilities').textContent = room.facilities || '-';
+                        document.getElementById('room-detail').style.display = 'block';
+                    } else {
+                        document.getElementById('room-detail').style.display = 'none';
+                    }
+                });
+            </script>
+
             <label for="title">Judul Pemesanan:</label>
             <input type="text" id="title" name="title" value="{{ old('title') }}" required placeholder="Judul Booking">
 
